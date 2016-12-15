@@ -1,2 +1,2 @@
-# dump-sentry-event
-CLI tool to dump some data from a Sentry event to CSV
+# dump-sentry-issue
+CLI tool to dump some data from a Sentry issue to CSV
