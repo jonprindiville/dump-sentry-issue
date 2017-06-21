@@ -11,7 +11,7 @@ CLI tool to dump some data from a Sentry issue to CSV
 ## Usage
 
 ```
-usage: dump_sentry_issue.py [-h] -b token_hash -i id
+usage: dump_sentry_issue.py [-h] -b token_hash -i id [-m n]
                             field_name [field_name ...]
 
 Dump some data to CSV from a Sentry issue
@@ -25,6 +25,7 @@ optional arguments:
                         Your Sentry bearer token (a hexadecimal string, see
                         https://sentry.io/api/)
   -i id, --issue id     The Sentry issue id
+  -m n, --max-events n  Maximum number of events to retrieve
 ```
 
 ## Output format
@@ -52,5 +53,4 @@ $ python dump_sentry_issue.py -b YOUR_BEARER_TOKEN -i YOUR_EVENT_ID id_param gap
 ## Thing this tool does not do
 
 - non-CSV output (or CSV output without empty leading row/column)
-- limit the number of returned rows (we just page through everything that Sentry gives us)
 - any fancy handling of the data the Sentry gives back (Sentry returns most values as `repr`-strings, for instance if you sent Sentry the string `u'foo'` it would come back through their API as `u"u'foo'"`. We `eval` the values to get back a Python value -- if your value is a list, probably the things inside your list will still be `repr`-strings, and also the commas in the list's representation will mess up your CSV... we could be nicer and more extensible about post-processing the received data, but we're not... maybe later)

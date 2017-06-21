@@ -21,6 +21,7 @@ logger.addHandler(console_handler)
 def _get_parser():
     parser = argparse.ArgumentParser(
         description='Dump some data to CSV from a Sentry issue')
+
     parser.add_argument(
         '-b',
         '--bearer-token',
@@ -28,6 +29,7 @@ def _get_parser():
         required=True,
         metavar='token_hash',
         help='Your Sentry bearer token (a hexadecimal string, see https://sentry.io/api/)')
+
     parser.add_argument(
         '-i',
         '--issue',
@@ -35,15 +37,26 @@ def _get_parser():
         required=True,
         metavar='id',
         help='The Sentry issue id')
+
+    parser.add_argument(
+        '-m',
+        '--max-events',
+        nargs=1,
+        required=False,
+        metavar='n',
+        type=int,
+        help='Maximum number of events to retrieve')
+
     parser.add_argument(
         'fields',
         nargs='+',
         metavar='field_name',
         help='The field names you wish to capture')
+
     return parser
 
 
-def scrape(bearer_token, issue, fields):
+def scrape(bearer_token, issue, max_events, fields):
 
     initial_url = 'https://sentry.io/api/0/issues/{}/events/'.format(issue)
     authorization = 'Bearer {}'.format(bearer_token)
@@ -54,6 +67,14 @@ def scrape(bearer_token, issue, fields):
     contexts = []
 
     while urls_to_process:
+        count = len(contexts)
+        if max_events > 0 and count > max_events:
+            logger.info(
+                'Got %d events, requested max %d events. Ending event-fetching early.',
+                count,
+                max_events)
+            break
+
         url = urls_to_process.pop(0)
 
         logger.info('processing %s', url)
@@ -110,7 +131,10 @@ def scrape(bearer_token, issue, fields):
         # be "unwrapped" (e.g. u'u"foo"' becomes u"foo")
         for k, v in ctx.items():
             if isinstance(v, unicode):
-                ctx[k] = eval(v)
+                try:
+                    ctx[k] = eval(v)
+                except SyntaxError:
+                    pass
             if isinstance(ctx[k], datetime.date):
                 ctx[k] = ctx[k].isoformat()
 
@@ -127,5 +151,5 @@ if __name__ == '__main__':
     scrape(
         settings.bearer_token[0],
         settings.issue[0],
+        settings.max_events[0] if settings.max_events else -1,
         settings.fields)
-
