@@ -4,9 +4,11 @@ CLI tool to dump some data from a Sentry issue to CSV
 
 ## Requirements
 
-- You should have a [Sentry](https://sentry.io) account and some issue from which you'd like to extract some data.
+- You should have a [Sentry](https://sentry.io) account and some issue from which you'd like to extract some data. You should also get your hands on a Sentry _bearer token_ (from https://sentry.io/api/.)
 
-- This tool depends on the `requests` library. You can install it pretty easily with `pip install requests`. You might want to do that in [a virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/) -- your call!
+- Python 3!
+
+- The `requests` library. You can install it pretty easily with `pip install requests`. You might want to do that in [a virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/) -- your call!
 
 ## Usage
 
