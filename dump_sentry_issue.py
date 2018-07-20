@@ -7,8 +7,9 @@ import argparse
 import datetime  # needed to `eval` some datetimes
 import json
 import logging
-import requests
 import sys
+
+import requests
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -114,23 +115,23 @@ def scrape(bearer_token, issue, max_events, fields):
     logger.info('generating csv...')
 
     # column names
-    print ''  # blank leading row
-    print ','.join(
+    print('') # blank leading row
+    print(','.join(
         [''] +  # blank leading column
-        fields)
+        fields))
 
-    # drop keys that we don't care about
+    # create a new context, once keys we don't care about have been removed.
+    cleaned_contexts = []
     for ctx in contexts:
-        for k in ctx.keys():
-            if k not in fields:
-                del ctx[k]
+        ctx = {k: v for k, v in ctx.items() if k in fields}
+        cleaned_contexts.append(ctx)
 
-    for ctx in contexts:
+    for ctx in cleaned_contexts:
         # Sentry presents most values as their Python repr strings -- here we'll
         # get back our ints and datetimes into native Python types and strings will
         # be "unwrapped" (e.g. u'u"foo"' becomes u"foo")
         for k, v in ctx.items():
-            if isinstance(v, unicode):
+            if isinstance(v, str):
                 try:
                     ctx[k] = eval(v)
                 except SyntaxError:
@@ -139,10 +140,10 @@ def scrape(bearer_token, issue, max_events, fields):
                 ctx[k] = ctx[k].isoformat()
 
         # Output something csv-like
-        print ','.join(
+        print(','.join(
             [''] +  # blank leading column
-            [unicode(ctx[f]) for f in fields]
-        )
+            [str(ctx[f]) for f in fields]
+        ))
 
 
 if __name__ == '__main__':
